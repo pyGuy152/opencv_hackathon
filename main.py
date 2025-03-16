@@ -10,7 +10,7 @@ import cv2
 model = YOLO('yolov8n.pt')  # You can replace with 'yolov8s.pt', 'yolov8m.pt', etc.
 
 # Load the image using OpenCV
-img_path = '/kaggle/input/jjjjjjjjj/gettyimages-1462659206-612x612.jpg'
+img_path = 'premium_photo-1674170065323-9f207919ea27.jpeg'
 img = cv2.imread(img_path)
 
 # Convert BGR to RGB for displaying with matplotlib
