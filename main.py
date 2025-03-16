@@ -28,15 +28,17 @@ def api():
         file = request.files['file']
 
         if file:
-            if file.filename == '':
-                return 'No selected file'
+            #if file.filename == '':
+            #    return 'No selected file'
             
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-            file.save(filepath)
+            #filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+            #file.save(filepath)
             # Open the image using PIL and then process it
             image = Image.open(file)
-            img = cv2.imread(filepath)
-            os.remove(file_path)
+            img = np.array(image)
+            # os.remove(filepath)
+            if img is None:
+                return "Error: Could not read image", 400
             img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             
             results = model(img_rgb)
