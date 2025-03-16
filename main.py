@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from ultralytics import YOLO
 from PIL import Image
+from numpy import np
 import torch
 import cv2
 import os
