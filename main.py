@@ -33,21 +33,12 @@ else:
 app = Flask(__name__)
 
 
-# Define where to save the uploaded data (you can change this as needed)
-UPLOAD_FOLDER = 'uploads'
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
 
 # Define the route for uploading a stream of data
 
 @app.route("/ai")
 def ai():
     return f'{x} {y} {w} {h}'
-
-# Define the upload folder where you want to store the files
-UPLOAD_FOLDER = 'uploads'
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
 
 @app.route('/api', methods=['POST'])
 def api():
@@ -59,20 +50,23 @@ def api():
     file = request.files['file']
     
     if file:
-        # Save the file to a folder on the server
-        filename = os.path.join(UPLOAD_FOLDER, 'uploaded_image.jpg')
-        file.save(filename)
-        
-        # Read the image (you can do further processing here)
-        img = Image.open(filename)
-        
-        # Example: display image info (you can add your processing logic here)
-        print("Image dimensions:", img.size)
-        print("Image format:", img.format)
-        
-        # Perform any other image processing (e.g., resizing, analyzing, etc.)
-        
-        return f"Image uploaded successfully and saved as {filename}", 200
+        image = Image.open(file)
+        model = YOLO('yolov8n.pt')
+        img = cv2.imread(file)
+        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        results = model(img_rgb)
+        predictions = results[0].boxes
+        x, y, w, h = map(int, predictions.xywh[0])
+        width, height = image.size
+        center = [x+(w/2),y+(h/2)]
+        if (center < width/2-10):
+            return "Left", 200
+        elif (center > width/2+10):
+            return "Right", 200
+        elif ((x*h)/(width*height) > 0.75):
+            return "Stop", 200
+        else:
+            return "Forward", 200
     else:
         return "File not received", 400
 
