@@ -1,3 +1,4 @@
+from waitress import serve
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -13,5 +14,5 @@ def api():
     except Exception as e:
         return jsonify({"error": str(e)}), 400 #Return an error if the request is not valid.
 
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    serve(app, host='0.0.0.0', port=5000)
