@@ -51,8 +51,10 @@ def api():
     
     if file:
         image = Image.open(file)
-        model = YOLO('yolov8n.pt')
-        img = cv2.imread(file)
+        import io
+
+        file_bytes = file.read()
+        img = np.array(Image.open(io.BytesIO(file_bytes)))
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         results = model(img_rgb)
         predictions = results[0].boxes
