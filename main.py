@@ -44,6 +44,10 @@ if not os.path.exists(UPLOAD_FOLDER):
 def ai():
     return f'{x} {y} {w} {h}'
 
+# Define the upload folder where you want to store the files
+UPLOAD_FOLDER = 'uploads'
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 @app.route('/api', methods=['POST'])
 def api():
