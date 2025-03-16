@@ -23,8 +23,8 @@ def api():
         if file:
             # Open the image using PIL and then process it
             image = Image.open(file)
-            img = cv2.imread(file)
-            img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            # img = cv2.imread(file)
+            img_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             
             results = model(img_rgb)
             predictions = results[0].boxes
