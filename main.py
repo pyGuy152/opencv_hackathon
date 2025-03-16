@@ -1,76 +1,56 @@
-from waitress import serve
 from flask import Flask, request, jsonify
 from ultralytics import YOLO
 from PIL import Image
-import numpy as np
 import torch
 import cv2
 import os
+import traceback  # To print the traceback in case of errors
 
-# Load the pre-trained YOLOv8 model (or you can use a smaller model like 'yolov5')
-model = YOLO('yolov8n.pt')  # You can replace with 'yolov8s.pt', 'yolov8m.pt', etc.
-
-# Load the image using OpenCV
-img_path = 'premium_photo-1674170065323-9f207919ea27.jpeg'
-img = cv2.imread(img_path)
-
-# Convert BGR to RGB for displaying with matplotlib
-img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-# Perform object detection on the image
-results = model(img_rgb)
-
-# Get results in format (xyxy, confidence, class) for detected objects
-predictions = results[0].boxes  # Detected boxes
-x, y, w, h = map(int, predictions.xywh[0])
-print(x,y,w,h)
-
-if len(predictions) > 0:
-    x, y, w, h = map(int, predictions.xywh[0])
-else:
-    x, y, w, h = 0, 0, 0, 0
+# Load the model
+model = YOLO('yolov8n.pt')
 
 app = Flask(__name__)
 
-
-
-# Define the route for uploading a stream of data
-
-@app.route("/ai")
-def ai():
-    return f'{x} {y} {w} {h}'
-
 @app.route('/api', methods=['POST'])
 def api():
-    # Check if the request contains the file data
-    if 'file' not in request.files:
-        return "No file part", 400
-    
-    # Retrieve the file
-    file = request.files['file']
-    
-    if file:
-        image = Image.open(file)
-        import io
+    try:
+        # Check if the request contains the file data
+        if 'file' not in request.files:
+            return "No file part", 400
 
-        file_bytes = file.read()
-        img = np.array(Image.open(io.BytesIO(file_bytes)))
-        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        results = model(img_rgb)
-        predictions = results[0].boxes
-        x, y, w, h = map(int, predictions.xywh[0])
-        width, height = image.size
-        center = [x+(w/2),y+(h/2)]
-        if (center < width/2-10):
-            return "Left", 200
-        elif (center > width/2+10):
-            return "Right", 200
-        elif ((x*h)/(width*height) > 0.75):
-            return "Stop", 200
+        file = request.files['file']
+
+        if file:
+            # Open the image using PIL and then process it
+            image = Image.open(file)
+            img = cv2.imread(file)
+            img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            
+            results = model(img_rgb)
+            predictions = results[0].boxes
+            x, y, w, h = map(int, predictions.xywh[0])
+
+            width, height = image.size
+            center = [x + (w / 2), y + (h / 2)]
+
+            if center[0] < width / 2 - 10:
+                return "Left", 200
+            elif center[0] > width / 2 + 10:
+                return "Right", 200
+            elif (x * h) / (width * height) > 0.75:
+                return "Stop", 200
+            else:
+                return "Forward", 200
         else:
-            return "Forward", 200
-    else:
-        return "File not received", 400
+            return "File not received", 400
+    except Exception as e:
+        # Log the error
+        error_message = str(e)
+        traceback_str = traceback.format_exc()
+        print(f"Error occurred: {error_message}")
+        print(traceback_str)
+        return f"Internal Server Error: {error_message}", 500
 
 if __name__ == "__main__":
+    from waitress import serve
     serve(app, host='0.0.0.0', port=8000)
