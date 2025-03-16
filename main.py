@@ -31,9 +31,47 @@ else:
 
 app = Flask(__name__)
 
+
+# Define where to save the uploaded data (you can change this as needed)
+UPLOAD_FOLDER = 'uploads'
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+# Define the route for uploading a stream of data
+@app.route('/upload_stream', methods=['POST'])
+def upload_stream():
+    # Check if the request contains the stream data
+    if 'file' not in request.files:
+        return "No file part", 400
+
+    # Retrieve the file from the request
+    file = request.files['file']
+    
+    # Save the file to the upload folder (or process it as needed)
+    if file:
+        img = cv2.imread(file)
+
+        # Convert BGR to RGB for displaying with matplotlib
+        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+        # Perform object detection on the image
+        results = model(img_rgb)
+
+        # Get results in format (xyxy, confidence, class) for detected objects
+        predictions = results[0].boxes  # Detected boxes
+        x, y, w, h = map(int, predictions.xywh[0])
+        return f"{x} {y} {w} {h}"
+
+    return "File not received", 400
+
 @app.route("/ai")
 def ai():
     return f'{x} {y} {w} {h}'
+
+@app.route("/stream")
+def ai():
+    return f'{x} {y} {w} {h}'
+
 
 @app.route('/api', methods=['POST'])
 def api():
