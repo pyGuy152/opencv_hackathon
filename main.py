@@ -69,10 +69,6 @@ def upload_stream():
 def ai():
     return f'{x} {y} {w} {h}'
 
-@app.route("/stream")
-def ai():
-    return f'{x} {y} {w} {h}'
-
 
 @app.route('/api', methods=['POST'])
 def api():
