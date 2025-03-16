@@ -11,6 +11,13 @@ model = YOLO('yolov8n.pt')
 
 app = Flask(__name__)
 
+
+# Set upload folder
+UPLOAD_FOLDER = 'uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+
 @app.route('/api', methods=['POST'])
 def api():
     try:
@@ -21,10 +28,16 @@ def api():
         file = request.files['file']
 
         if file:
+            if file.filename == '':
+                return 'No selected file'
+            
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+            file.save(filepath)
             # Open the image using PIL and then process it
             image = Image.open(file)
-            # img = cv2.imread(file)
-            img_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            img = cv2.imread(filepath)
+            os.remove(file_path)
+            img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             
             results = model(img_rgb)
             predictions = results[0].boxes
