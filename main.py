@@ -1,31 +1,28 @@
-import os
-
-# 🚀 Prevent Ultralytics from Using OpenCV
-os.environ["USE_OPENCV"] = "False"
-os.environ["YOLO_VERBOSE"] = "False"
-
 from waitress import serve
 from flask import Flask, request, jsonify
 from ultralytics import YOLO
 from PIL import Image
 import numpy as np
 import torch
+import cv2
 
-# Load YOLOv8 Model
-model = YOLO('yolov8n.pt')
+# Load the pre-trained YOLOv8 model (or you can use a smaller model like 'yolov5')
+model = YOLO('yolov8n.pt')  # You can replace with 'yolov8s.pt', 'yolov8m.pt', etc.
 
-# Load the image using PIL instead of OpenCV
-img_path = 'premium_photo-1674170065323-9f207919ea27.jpeg'
-img = Image.open(img_path).convert('RGB')
+# Load the image using OpenCV
+img_path = '/kaggle/input/jjjjjjjjj/gettyimages-1462659206-612x612.jpg'
+img = cv2.imread(img_path)
 
-# Convert to NumPy array for YOLO
-img_np = np.array(img)
+# Convert BGR to RGB for displaying with matplotlib
+img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-# Perform object detection
-results = model(img_np)
+# Perform object detection on the image
+results = model(img_rgb)
 
-# Get bounding box results
-predictions = results[0].boxes
+# Get results in format (xyxy, confidence, class) for detected objects
+predictions = results[0].boxes  # Detected boxes
+x, y, w, h = map(int, predictions.xywh[0])
+print(x,y,w,h)
 
 if len(predictions) > 0:
     x, y, w, h = map(int, predictions.xywh[0])
