@@ -1,3 +1,9 @@
+import os
+
+# 🚀 Prevent Ultralytics from Using OpenCV
+os.environ["USE_OPENCV"] = "False"
+os.environ["YOLO_VERBOSE"] = "False"
+
 from waitress import serve
 from flask import Flask, request, jsonify
 from ultralytics import YOLO
@@ -5,19 +11,14 @@ from PIL import Image
 import numpy as np
 import torch
 
-# Force Ultralytics to disable OpenCV usage
-import os
-os.environ["YOLO_VERBOSE"] = "False"  # Reduce logging
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"  # Prevent conflicts
-
-# Load the pre-trained YOLOv8 model
+# Load YOLOv8 Model
 model = YOLO('yolov8n.pt')
 
 # Load the image using PIL instead of OpenCV
 img_path = 'premium_photo-1674170065323-9f207919ea27.jpeg'
-img = Image.open(img_path).convert('RGB')  # Ensure RGB format
+img = Image.open(img_path).convert('RGB')
 
-# Convert image to NumPy array
+# Convert to NumPy array for YOLO
 img_np = np.array(img)
 
 # Perform object detection
@@ -29,7 +30,7 @@ predictions = results[0].boxes
 if len(predictions) > 0:
     x, y, w, h = map(int, predictions.xywh[0])
 else:
-    x, y, w, h = 0, 0, 0, 0  # Default values if no objects detected
+    x, y, w, h = 0, 0, 0, 0
 
 app = Flask(__name__)
 
