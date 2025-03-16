@@ -2,6 +2,8 @@ from waitress import serve
 from flask import Flask, request, jsonify
 from ultralytics import YOLO
 import cv2
+cv2.setUseOptimized(True)
+
 import numpy as np
 
 # Load the pre-trained YOLOv8 model (or you can use a smaller model like 'yolov5')
