@@ -39,31 +39,6 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 # Define the route for uploading a stream of data
-@app.route('/upload_stream', methods=['POST'])
-def upload_stream():
-    # Check if the request contains the stream data
-    if 'file' not in request.files:
-        return "No file part", 400
-
-    # Retrieve the file from the request
-    file = request.files['file']
-    
-    # Save the file to the upload folder (or process it as needed)
-    if file:
-        img = cv2.imread(file)
-
-        # Convert BGR to RGB for displaying with matplotlib
-        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-        # Perform object detection on the image
-        results = model(img_rgb)
-
-        # Get results in format (xyxy, confidence, class) for detected objects
-        predictions = results[0].boxes  # Detected boxes
-        x, y, w, h = map(int, predictions.xywh[0])
-        return f"{x} {y} {w} {h}"
-
-    return "File not received", 400
 
 @app.route("/ai")
 def ai():
@@ -72,13 +47,30 @@ def ai():
 
 @app.route('/api', methods=['POST'])
 def api():
-    try:
-        data = request.get_json()
-        if data is None:
-            return jsonify({"error": "Invalid JSON data"}), 400
-        return jsonify({"message": "API POST request received", "data": data})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
+    # Check if the request contains the file data
+    if 'file' not in request.files:
+        return "No file part", 400
+    
+    # Retrieve the file
+    file = request.files['file']
+    
+    if file:
+        # Save the file to a folder on the server
+        filename = os.path.join(UPLOAD_FOLDER, 'uploaded_image.jpg')
+        file.save(filename)
+        
+        # Read the image (you can do further processing here)
+        img = Image.open(filename)
+        
+        # Example: display image info (you can add your processing logic here)
+        print("Image dimensions:", img.size)
+        print("Image format:", img.format)
+        
+        # Perform any other image processing (e.g., resizing, analyzing, etc.)
+        
+        return f"Image uploaded successfully and saved as {filename}", 200
+    else:
+        return "File not received", 400
 
 if __name__ == "__main__":
     serve(app, host='0.0.0.0', port=8000)
