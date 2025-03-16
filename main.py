@@ -49,9 +49,9 @@ def api():
             width, height = image.size
             center = [x + (w / 2), y + (h / 2)]
 
-            if center[0] < width / 2 - 10:
+            if center[0] < width / 2 - 50:
                 return "Left", 200
-            elif center[0] > width / 2 + 10:
+            elif center[0] > width / 2 + 50:
                 return "Right", 200
             elif (x * h) / (width * height) > 0.75:
                 return "Stop", 200
