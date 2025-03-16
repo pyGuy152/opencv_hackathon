@@ -5,6 +5,7 @@ from PIL import Image
 import numpy as np
 import torch
 import cv2
+import os
 
 # Load the pre-trained YOLOv8 model (or you can use a smaller model like 'yolov5')
 model = YOLO('yolov8n.pt')  # You can replace with 'yolov8s.pt', 'yolov8m.pt', etc.
